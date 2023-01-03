@@ -28,14 +28,14 @@ class Game():
     def run(self):
         pygame.init()
         self.screen = pygame.display.set_mode(self.screenSize)
-        running = True
-        while running:
+        run = True
+        while run:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    running = False
-                self.draw()
-                pygame.display.flip()
-            pygame.quit()
+                    run = False
+            self.draw()
+            pygame.display.flip()
+        pygame.quit()
 
     def loadImages(self):
         self.images = {}
