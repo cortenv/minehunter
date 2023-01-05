@@ -1,0 +1,29 @@
+import pygame
+
+background = pygame.display.set_mode((500, 350))
+def function():
+    global count
+    while True:
+        for i in pygame.event.get():
+            if i.type == pygame.QUIT:
+                return
+
+            #For detecting mouse click
+            if i.type == pygame.MOUSEBUTTONDOWN:
+                count += 1
+                print('clicked',count)
+                return count
+                
+
+        pygame.display.update()
+def main():
+    run = True
+    while run:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                run = False
+        
+    pygame.quit()
+
+if __name__ == "__main__":
+    main()
