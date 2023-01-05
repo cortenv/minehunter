@@ -7,8 +7,12 @@ from random import random
 class Board():
     def __init__(self, size, prob):
         self.size = size
-        self.setBoard()
         self.prob = prob
+        self.lost = False
+        self.numClicked = 0
+        self.numNonBombs = 0
+        self.setBoard()
+
 
     def setBoard(self):
         self.board = []
@@ -16,6 +20,8 @@ class Board():
             row = []
             for col in range(self.size[1]):
                 hasBomb = random() < prob
+                if (not hasBomb):
+                    self.numNonBombs += 1
                 piece = Piece(hasBomb)
                 row.append(piece)
             self.board.append(row)
@@ -45,6 +51,30 @@ class Board():
     def getPiece(self, index):
         return self.board[index [0]][index [1]]
 
+    def handleClick(self, piece, flag):
+        if (piece.getClicked() or (not flag and piece.getFlagged())):
+            return
+        if (flag):
+            piece.toggleFlag()
+            return
+        piece.click()
+        if (piece.getHasBomb()):
+            self.lost = True
+            return
+        self.numClicked += 1
+        if (piece.getNumAround() != 0):
+            return
+        for neighbor in piece.getNeighbors():
+            if (not neighbor.getHasBomb() and not neighbor.getClicked()):
+                self.handleClick(neighbor, False)
+
+    def getLost(self):
+        return self.lost
+
+    def getWon(self):
+        return self.numNonBombs == self.numClicked
+
+
 
 class Piece():
     def __init__(self, hasBomb):
@@ -73,6 +103,15 @@ class Piece():
 
     def getNumAround(self):
         return self.numAround
+
+    def toggleFlag(self):
+        self.flagged = not self.flagged
+
+    def click(self):
+        self.clicked = True
+
+    def getNeighbors(self):
+        return self.neighbors
             
 
 class Game():
@@ -90,8 +129,14 @@ class Game():
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     run = False
+                if (event.type == pygame.MOUSEBUTTONDOWN):
+                    position = pygame.mouse.get_pos()
+                    rightClick = pygame.mouse.get_pressed()[2]
+                    self.handleClick(position, rightClick)
             self.draw()
             pygame.display.flip()
+            if (self.board.getWon()):
+                run = False
         pygame.quit()
 
     def draw(self):
@@ -114,11 +159,22 @@ class Game():
             self.images[fileName.split(".")[0]] = image
 
     def getImage(self, piece):
-        string = "mine" if piece.getHasBomb() else str(piece.getNumAround())
+        string = None
+        if (piece.getClicked()):
+            string = "mine-clicked" if piece.getHasBomb() else str(piece.getNumAround())
+        else:
+            string = "flag" if piece.getFlagged() else "tile"
         return self.images[string]
 
+    def handleClick(self, position, rightClick):
+        if (self.board.getLost()):
+            return
+        index = position[1] // self.pieceSize[1], position[0] // self.pieceSize[0]
+        piece = self.board.getPiece(index)
+        self.board.handleClick(piece, rightClick)
+
 size = (9, 9)
-prob = 0.4
+prob = 0.1
 board = Board(size, prob)
 screenSize = (800, 800)
 game = Game(board, screenSize)
