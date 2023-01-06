@@ -15,8 +15,8 @@ pygame.display.set_caption("Spiel einstellungen:")
 
 font = pygame.font.SysFont('arial',35)
 text = font.render('Spielfeldgrösse:' , True , white)
-text = font.render('5x5' , True , white)
 text = font.render('9x9' , True , white)
+text = font.render('14x14' , True , white)
 text = font.render('20x20' , True , white)
 text = font.render('Recursion an oder aus?' , True , white)
 

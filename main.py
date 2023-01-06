@@ -6,25 +6,30 @@ from random import random
 pygame.display.set_caption("minehunter")
 
 class Board():
-    def __init__(self, size, prob):
+    def __init__(self, size):
         self.size = size
-        self.prob = prob
+        self.prob = 0.2
         self.lost = False
         self.numClicked = 0
         self.numNonBombs = 0
+        self.temp = 0
         self.setBoard()
+       
+
 
     def setBoard(self):
         self.board = []
+        piecePos = 0
         for row in range (self.size[0]):
-            row = []
+            rows = []
             for col in range(self.size[1]):
-                hasBomb = random() < prob
+                hasBomb = random() < self.prob
                 if (not hasBomb):
                     self.numNonBombs += 1
-                piece = Piece(hasBomb)
-                row.append(piece)
-            self.board.append(row)
+                piecePos += 1    
+                piece = Piece(hasBomb, piecePos)
+                rows.append(piece)
+            self.board.append(rows)
         self.setNeighbors()
 
     def setNeighbors(self):
@@ -33,17 +38,18 @@ class Board():
                 piece = self.getPiece((row, col))
                 neighbors = self.getListOfNeighbors((row, col))
                 piece.setNeighbors(neighbors)
+        
 
     def getListOfNeighbors(self, index):
         neighbors = []
-        for row in range(index[0] - 1, index[0] + 1):
-            for col in range(index[1] - 1, index[1] + 1):
+        for row in range(index[0] - 1, index[0] + 2):
+            for col in range(index[1] - 1, index[1] + 2):
                 outOfBounds = row < 0 or row >= self.size[0] or col < 0 or col >= self.size[1]
                 same = row == index[0] and col == index[1]
                 if (same or outOfBounds):
                     continue
                 neighbors.append(self.getPiece((row, col)))
-            return neighbors
+        return neighbors
 
     def getSize(self):
         return self.size
@@ -66,14 +72,12 @@ class Board():
 
         self.numClicked += 1
 
-        recursion = True
-        while recursion:
-            if (piece.getNumAround() != 0):
-                return
-        #auskommentiert damit recursion aus ist
-        #for neighbor in piece.getNeighbors():
-        #    if (not neighbor.getHasBomb() and not neighbor.getClicked()):
-        #        self.handleClick(neighbor, False)
+        if (piece.getNumAround() != 0):
+            return
+        # auskommentiert damit recursion aus ist
+        # for neighbor in piece.getNeighbors():
+        #     if (not neighbor.getHasBomb() and not neighbor.getClicked()):
+        #         self.handleClick(neighbor, False)
 
     def getLost(self):
         return self.lost
@@ -83,10 +87,11 @@ class Board():
 
 
 class Piece():
-    def __init__(self, hasBomb):
+    def __init__(self, hasBomb, position):
         self.hasBomb = hasBomb
         self.clicked = False
         self.flagged = False
+        self.position = position
 
     def getHasBomb(self):
         return self.hasBomb
@@ -184,8 +189,7 @@ class Game():
 
 
 size = (9, 9)
-prob = 0.2
-board = Board(size, prob)
+board = Board(size)
 screenSize = (800, 800)
 game = Game(board, screenSize)
 game.run()
