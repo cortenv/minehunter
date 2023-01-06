@@ -1,8 +1,9 @@
 import pygame
 import os
-#import mouse
+import sys
 from random import random
-##pygame.font.init()
+
+pygame.display.set_caption("minehunter")
 
 class Board():
     def __init__(self, size, prob):
@@ -12,7 +13,6 @@ class Board():
         self.numClicked = 0
         self.numNonBombs = 0
         self.setBoard()
-
 
     def setBoard(self):
         self.board = []
@@ -36,8 +36,8 @@ class Board():
 
     def getListOfNeighbors(self, index):
         neighbors = []
-        for row in range(index[0] - 1, index[0] + 2):
-            for col in range(index[1] - 1, index[1] + 2):
+        for row in range(index[0] - 1, index[0] + 1):
+            for col in range(index[1] - 1, index[1] + 1):
                 outOfBounds = row < 0 or row >= self.size[0] or col < 0 or col >= self.size[1]
                 same = row == index[0] and col == index[1]
                 if (same or outOfBounds):
@@ -54,26 +54,32 @@ class Board():
     def handleClick(self, piece, flag):
         if (piece.getClicked() or (not flag and piece.getFlagged())):
             return
+
         if (flag):
-            piece.toggleFlag()
+            piece.placeFlag()
             return
+
         piece.click()
         if (piece.getHasBomb()):
             self.lost = True
             return
+
         self.numClicked += 1
-        if (piece.getNumAround() != 0):
-            return
-        for neighbor in piece.getNeighbors():
-            if (not neighbor.getHasBomb() and not neighbor.getClicked()):
-                self.handleClick(neighbor, False)
+
+        recursion = True
+        while recursion:
+            if (piece.getNumAround() != 0):
+                return
+        #auskommentiert damit recursion aus ist
+        #for neighbor in piece.getNeighbors():
+        #    if (not neighbor.getHasBomb() and not neighbor.getClicked()):
+        #        self.handleClick(neighbor, False)
 
     def getLost(self):
         return self.lost
 
-    def getWon(self):
+    def getWin(self):
         return self.numNonBombs == self.numClicked
-
 
 
 class Piece():
@@ -94,24 +100,26 @@ class Piece():
     def setNeighbors(self, neighbors):
         self.neighbors = neighbors
         self.setNumAround()
+
+    def getNeighbors(self):
+        return self.neighbors
     
     def setNumAround(self):
         self.numAround = 0
         for piece in self.neighbors:
             if (piece.getHasBomb()):
                 self.numAround += 1
+            else:
+                pass
 
     def getNumAround(self):
         return self.numAround
 
-    def toggleFlag(self):
+    def placeFlag(self):
         self.flagged = not self.flagged
 
     def click(self):
         self.clicked = True
-
-    def getNeighbors(self):
-        return self.neighbors
             
 
 class Game():
@@ -135,7 +143,7 @@ class Game():
                     self.handleClick(position, rightClick)
             self.draw()
             pygame.display.flip()
-            if (self.board.getWon()):
+            if (self.board.getWin()):
                 run = False
         pygame.quit()
 
@@ -167,18 +175,31 @@ class Game():
         return self.images[string]
 
     def handleClick(self, position, rightClick):
-        if (self.board.getLost()):
-            return
+        # auskommentiert damit das Spiel nicht einfriert wenn man auf eine Mine drückt
+        # if (self.board.getLost()):
+        #     return
         index = position[1] // self.pieceSize[1], position[0] // self.pieceSize[0]
         piece = self.board.getPiece(index)
         self.board.handleClick(piece, rightClick)
 
+
 size = (9, 9)
-prob = 0.1
+prob = 0.2
 board = Board(size, prob)
 screenSize = (800, 800)
 game = Game(board, screenSize)
 game.run()
 
-while True:
+running = True
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            sys.exit()
+
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
+                pygame.quit()
+                sys.exit()
+
     pygame.display.update()
