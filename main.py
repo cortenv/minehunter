@@ -8,8 +8,9 @@ pygame.display.set_caption("minehunter")
 class Board():
     def __init__(self, size):
         self.size = size
-        self.prob = 0.2
+        self.prob = 0.15
         self.lost = False
+        self.win = False
         self.numClicked = 0
         self.numNonBombs = 0
         self.temp = 0
@@ -74,10 +75,10 @@ class Board():
 
         if (piece.getNumAround() != 0):
             return
-        # auskommentiert damit recursion aus ist
-        # for neighbor in piece.getNeighbors():
-        #     if (not neighbor.getHasBomb() and not neighbor.getClicked()):
-        #         self.handleClick(neighbor, False)
+        #auskommentiert damit recursion aus ist
+        for neighbor in piece.getNeighbors():
+           if (not neighbor.getHasBomb() and not neighbor.getClicked()):
+              self.handleClick(neighbor, False)
 
     def getLost(self):
         return self.lost
@@ -149,7 +150,8 @@ class Game():
             self.draw()
             pygame.display.flip()
             if (self.board.getWin()):
-                run = False
+                import won
+                won
         pygame.quit()
 
     def draw(self):
@@ -181,11 +183,14 @@ class Game():
 
     def handleClick(self, position, rightClick):
         # auskommentiert damit das Spiel nicht einfriert wenn man auf eine Mine drückt
-        # if (self.board.getLost()):
-        #     return
+        if (self.board.getLost()):
+                    import lost
+                    lost
+        #      return
         index = position[1] // self.pieceSize[1], position[0] // self.pieceSize[0]
         piece = self.board.getPiece(index)
         self.board.handleClick(piece, rightClick)
+
 
 
 size = (9, 9)
@@ -194,16 +199,14 @@ screenSize = (800, 800)
 game = Game(board, screenSize)
 game.run()
 
-running = True
-while running:
+while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
-
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 pygame.quit()
-                sys.exit()
+                sys.exit()       
 
     pygame.display.update()

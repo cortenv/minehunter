@@ -1,8 +1,8 @@
 import pygame
 import sys
-#pygame.font.init()
-#from main import getWin
-#from main import getLost
+pygame.font.init()
+from main import getWin
+from main import getLost
 
 pygame.init()
 
@@ -27,10 +27,14 @@ text = font.render('Recursion an oder aus?' , True , white)
 
 #button = Button()
 
-run = True
-while run:
+running = True
+while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            run = False
+            pygame.quit()
+            sys.exit()
 
-pygame.quit()
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
+                pygame.quit()
+                sys.exit()
