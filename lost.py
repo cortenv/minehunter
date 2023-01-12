@@ -18,7 +18,7 @@ screen.blit(lostBG, (0,0))
 pygame.display.set_caption("You lost!")
 
 font = pygame.font.SysFont('cambria', 60)
-text_surface = font.render('You lost the game!', False, (black))
+text_surface = font.render('You lost the game!', True, (black))
 screen.blit(text_surface, (170,350))
 
 

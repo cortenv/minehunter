@@ -2,8 +2,12 @@ import pygame
 import os
 import sys
 from random import random
+pygame.font.init()
+pygame.font.get_fonts
 
 pygame.display.set_caption("minehunter")
+
+font = pygame.font.SysFont('cambria', 25)
 
 class Board():
     def __init__(self, size):
@@ -14,9 +18,9 @@ class Board():
         self.numClicked = 0
         self.numNonBombs = 0
         self.temp = 0
+        self.bombCounter = 0
         self.setBoard()
-       
-
+    
 
     def setBoard(self):
         self.board = []
@@ -25,6 +29,8 @@ class Board():
             rows = []
             for col in range(self.size[1]):
                 hasBomb = random() < self.prob
+                if (hasBomb == True):
+                    self.bombCounter = self.bombCounter + 1
                 if (not hasBomb):
                     self.numNonBombs += 1
                 piecePos += 1    
@@ -32,6 +38,7 @@ class Board():
                 rows.append(piece)
             self.board.append(rows)
         self.setNeighbors()
+        print (self.bombCounter)
 
     def setNeighbors(self):
         for row in range(self.size[0]):
@@ -75,7 +82,6 @@ class Board():
 
         if (piece.getNumAround() != 0):
             return
-        #auskommentiert damit recursion aus ist
         for neighbor in piece.getNeighbors():
            if (not neighbor.getHasBomb() and not neighbor.getClicked()):
               self.handleClick(neighbor, False)
@@ -85,7 +91,6 @@ class Board():
 
     def getWin(self):
         return self.numNonBombs == self.numClicked
-
 
 class Piece():
     def __init__(self, hasBomb, position):
@@ -147,6 +152,10 @@ class Game():
                     position = pygame.mouse.get_pos()
                     rightClick = pygame.mouse.get_pressed()[2]
                     self.handleClick(position, rightClick)
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        pygame.quit()
+                        sys.exit()
             self.draw()
             pygame.display.flip()
             if (self.board.getWin()):
@@ -163,6 +172,8 @@ class Game():
                 self.screen.blit(image, topLeft)
                 topLeft = topLeft[0] + self.pieceSize[0], topLeft[1]
             topLeft = 0, topLeft[1] + self.pieceSize[1]
+        text_surface = font.render(amountOfFlags, True, (0, 0, 0))
+        self.screen.blit(text_surface, (10,10))
 
     def loadImages(self):
         self.images = {}
@@ -182,31 +193,17 @@ class Game():
         return self.images[string]
 
     def handleClick(self, position, rightClick):
-        # auskommentiert damit das Spiel nicht einfriert wenn man auf eine Mine drückt
         if (self.board.getLost()):
                     import lost
                     lost
-        #      return
         index = position[1] // self.pieceSize[1], position[0] // self.pieceSize[0]
         piece = self.board.getPiece(index)
         self.board.handleClick(piece, rightClick)
-
-
 
 size = (9, 9)
 board = Board(size)
 screenSize = (800, 800)
 game = Game(board, screenSize)
+amountOfFlags = str(board.bombCounter)
+
 game.run()
-
-while True:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            pygame.quit()
-            sys.exit()
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_ESCAPE:
-                pygame.quit()
-                sys.exit()       
-
-    pygame.display.update()
