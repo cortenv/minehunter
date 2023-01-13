@@ -12,13 +12,15 @@ font = pygame.font.SysFont('cambria', 25)
 class Board():
     def __init__(self, size):
         self.size = size
-        self.prob = 0.15
+        # prob auf 0.05 ändern für demo
+        self.prob = 0.05
         self.lost = False
         self.win = False
         self.numClicked = 0
         self.numNonBombs = 0
         self.temp = 0
         self.bombCounter = 0
+        self.placedFlagCounter = 0
         self.setBoard()
     
 
@@ -70,7 +72,18 @@ class Board():
             return
 
         if (flag):
-            piece.placeFlag()
+            if (self.placedFlagCounter < self.bombCounter):
+                flagged = piece.placeFlag()
+                if (flagged == True):
+                    self.placedFlagCounter += 1
+                else:
+                    self.placedFlagCounter -= 1
+            else:
+                flagged = piece.placeFlag()
+                if (flagged == False):
+                    self.placedFlagCounter -= 1
+                else: 
+                    piece.placeFlag()
             return
 
         piece.click()
@@ -128,6 +141,8 @@ class Piece():
 
     def placeFlag(self):
         self.flagged = not self.flagged
+        return self.flagged
+
 
     def click(self):
         self.clicked = True
