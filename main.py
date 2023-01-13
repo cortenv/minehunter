@@ -13,7 +13,7 @@ class Board():
     def __init__(self, size):
         self.size = size
         # prob auf 0.05 ändern für demo
-        self.prob = 0.05
+        self.prob = 0.15
         self.lost = False
         self.win = False
         self.numClicked = 0
